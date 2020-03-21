@@ -14,10 +14,10 @@ After initializing cmodule, regular find_package() calls will work in top level 
 
 ```cmake
 include(FetchContent)
-FetchContent_Declare(cmodule
-  GIT_REPOSITORY https://github.com/scapix-com/cmodule.git
-  GIT_TAG        v1.0.0
-  GIT_SHALLOW    TRUE
+FetchContent_Declare(
+  cmodule
+  URL "https://github.com/scapix-com/cmodule/archive/v1.0.4.tar.gz"
+  URL_HASH SHA256=89171634a367cb580860c3cc2adbc93dda7c59fdcd03b2b8c92cc783eb5c5c92
 )
 FetchContent_MakeAvailable(cmodule)
 
