@@ -14,6 +14,10 @@ endif()
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+if(IOS)
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+endif()
+
 macro(cmodule_set_local_options)
   set(cmodule_cmake_folder_backup ${CMAKE_FOLDER})
   get_property(cmodule_compile_options_backup DIRECTORY PROPERTY COMPILE_OPTIONS)
