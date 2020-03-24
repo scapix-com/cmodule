@@ -18,6 +18,7 @@ if(NOT BOOST_COMPONENTS)
   set(BOOST_COMPONENTS "headers")
 endif()
 
+cmodule_set_local_options()
 get_property(guard GLOBAL PROPERTY CMODULE_GUARD_BOOST)
 if(NOT guard)
   set_property(GLOBAL PROPERTY CMODULE_GUARD_BOOST TRUE)
@@ -25,6 +26,7 @@ if(NOT guard)
 else()
   boost_add_components()
 endif()
+cmodule_restore_local_options()
 
 # Detect Boost version
 file(STRINGS "${BOOST_SOURCE}/boost/version.hpp" boost_version_raw REGEX "define BOOST_VERSION ")
