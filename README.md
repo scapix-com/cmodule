@@ -3,10 +3,8 @@
 Non-intrusive CMake dependency management.
 
 Normally CMake's find_package() looks for packages installed on host system (and compiled for host system).
-When using **cmodule**, find_package() downloads packages and compiles them for each target independently,
-using current CMake toolchain. This, among other things, allows using C/C++ libraries (like boost)
-when cross-compiling for Android, iOS, WebAssembly (Emscripten), etc.
-Downloaded and unpacked sources are shared between targets, while binaries are compiled for each target independently.
+When using **cmodule**, find_package() downloads packages and compiles them using current CMake toolchain.
+This allows using C/C++ libraries (like boost) whether you are building for host system or cross-compiling for Android, iOS, WebAssembly, etc.
 
 ## CMake integration
 
@@ -22,13 +20,16 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(cmodule)
 
 find_package(Boost REQUIRED COMPONENTS filesystem iostreams)
-target_link_libraries(${target} PUBLIC Boost::filesystem Boost::iostreams)
+target_link_libraries(mytarget PUBLIC Boost::filesystem Boost::iostreams)
 
 find_package(ZLIB REQUIRED)
-target_link_libraries(${target} PRIVATE ZLIB::ZLIB)
+target_link_libraries(mytarget PRIVATE ZLIB::ZLIB)
 
 find_package(BZip2 REQUIRED)
-target_link_libraries(${target} PRIVATE BZip2::BZip2)
+target_link_libraries(mytarget PRIVATE BZip2::BZip2)
+
+find_package(CURL REQUIRED)
+target_link_libraries(mytarget PRIVATE CURL::libcurl)
 ```
 
 ## How cmodule differs from other package managers?
