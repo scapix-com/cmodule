@@ -1,7 +1,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/cmodule.cmake)
 
 cmodule_add(
-  scapix 1.0.30
-  URL "https://github.com/scapix-com/scapix/archive/refs/tags/v1.0.30.tar.gz"
-  URL_HASH SHA256=030f5e7174114e62af30206f8376b1d3a05ee5b0cba88ac3f5d02a3e192ce1d5
+  scapix 1.0.31
+  URL "https://github.com/scapix-com/scapix/archive/refs/tags/v1.0.31.tar.gz"
+  URL_HASH SHA256=3942a8f50c0598120a047f4beaf3791d8c5097f2423ce982fd9f15ba5f5489c4
 )
