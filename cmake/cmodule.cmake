@@ -73,6 +73,7 @@ function(cmodule_add name version)
   FetchContent_Declare(
     ${content_name}
     ${content_source_dir}
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     ${ARGN}
   )
 
