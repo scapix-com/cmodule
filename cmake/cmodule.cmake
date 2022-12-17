@@ -23,7 +23,7 @@ macro(cmodule_set_local_options)
   get_property(cmodule_compile_options_backup DIRECTORY PROPERTY COMPILE_OPTIONS)
 
   set(CMAKE_FOLDER "cmodule")
-  if(CMODULE_DISABLE_WARNINGS)
+  if(CMODULE_DISABLE_WARNINGS AND DEFINED CMAKE_CXX_COMPILER_ID)
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
       add_compile_options(/W0)
     else()
