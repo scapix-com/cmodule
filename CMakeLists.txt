@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.14...3.26)
 
 if(CMAKE_HOST_WIN32)
     set(CMODULE_USER_HOME_DIR "$ENV{USERPROFILE}")
