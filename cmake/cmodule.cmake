@@ -19,10 +19,14 @@ if(IOS)
 endif()
 
 macro(cmodule_set_local_options)
-  set(cmodule_cmake_folder_backup ${CMAKE_FOLDER})
-  get_property(cmodule_compile_options_backup DIRECTORY PROPERTY COMPILE_OPTIONS)
 
+  set(CMODULE_BACKUP_CMAKE_FOLDER ${CMAKE_FOLDER})
   set(CMAKE_FOLDER "cmodule")
+
+  set(CMODULE_BACKUP_CMAKE_WARN_DEPRECATED ${CMAKE_WARN_DEPRECATED})
+  set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
+
+  get_property(CMODULE_BACKUP_COMPILE_OPTIONS DIRECTORY PROPERTY COMPILE_OPTIONS)
   if(CMODULE_DISABLE_WARNINGS AND DEFINED CMAKE_CXX_COMPILER_ID)
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL MSVC)
       add_compile_options(/W0)
@@ -30,29 +34,40 @@ macro(cmodule_set_local_options)
       add_compile_options(-w)
     endif()
   endif()
+
 endmacro()
 
 macro(cmodule_restore_local_options)
-  set(CMAKE_FOLDER ${cmodule_cmake_folder_backup})
-  set_property(DIRECTORY PROPERTY COMPILE_OPTIONS ${cmodule_compile_options_backup})
+
+  set(CMAKE_FOLDER ${CMODULE_BACKUP_CMAKE_FOLDER})
+  set(CMAKE_WARN_DEPRECATED ${CMODULE_BACKUP_CMAKE_WARN_DEPRECATED} CACHE BOOL "" FORCE)
+  set_property(DIRECTORY PROPERTY COMPILE_OPTIONS ${CMODULE_BACKUP_COMPILE_OPTIONS})
+
 endmacro()
 
 macro(find_package_next name)
+
   set(TEMP ${CMAKE_MODULE_PATH})
   list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
   find_package(${name})
   set(CMAKE_MODULE_PATH ${TEMP})
+
 endmacro()
 
 macro(cmodule_select_target shared static)
+
   if(CMODULE_SHARED_LIB)
     set(CMODULE_TARGET ${shared})
   else()
     set(CMODULE_TARGET ${static})
   endif()
+
 endmacro()
 
 function(cmodule_add name version)
+
+  cmake_parse_arguments(PARSE_ARGV 2 ARG "" "SOURCE_SUBDIR" "")
+
   set(content_name ${name}-${version})
   set(content_source_dir "")
 
@@ -81,9 +96,9 @@ function(cmodule_add name version)
   string(TOLOWER ${content_name} lower_content_name)
   if(NOT ${lower_content_name}_POPULATED)
     FetchContent_Populate(${content_name})
-    if(EXISTS "${${content_name}_SOURCE_DIR}/CMakeLists.txt")
+    if(EXISTS "${${content_name}_SOURCE_DIR}/${ARG_SOURCE_SUBDIR}/CMakeLists.txt")
       cmodule_set_local_options()
-      add_subdirectory("${${content_name}_SOURCE_DIR}" "${${content_name}_BINARY_DIR}" EXCLUDE_FROM_ALL)
+      add_subdirectory("${${content_name}_SOURCE_DIR}/${ARG_SOURCE_SUBDIR}" "${${content_name}_BINARY_DIR}" EXCLUDE_FROM_ALL)
       cmodule_restore_local_options()
     endif()
   endif()
@@ -98,4 +113,5 @@ function(cmodule_add name version)
   string(TOUPPER ${CMAKE_FIND_PACKAGE_NAME} upper_find_package_name)
   set(${upper_find_package_name}_FOUND TRUE PARENT_SCOPE)
   set(${CMAKE_FIND_PACKAGE_NAME}_FOUND TRUE PARENT_SCOPE)
+
 endfunction()
