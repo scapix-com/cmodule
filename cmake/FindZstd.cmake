@@ -13,14 +13,11 @@ if(MSVC)
 endif()
 
 cmodule_add(
-  zstd 1.5.4
-  URL      "https://github.com/facebook/zstd/archive/refs/tags/v1.5.4.tar.gz"
-  URL_HASH SHA256=35ad983197f8f8eb0c963877bf8be50490a0b3df54b4edeb8399ba8a8b2f60a4
+  zstd 1.5.5
+  URL      "https://github.com/facebook/zstd/releases/download/v1.5.5/zstd-1.5.5.tar.gz"
+  URL_HASH SHA256=9c4396cc829cfae319a6e2615202e82aad41372073482fce286fac78646d3ee4
+  SOURCE_SUBDIR "build/cmake"
 )
-
-cmodule_set_local_options()
-add_subdirectory("${CMODULE_zstd_SOURCE_DIR}/build/cmake" "${CMODULE_zstd_BINARY_DIR}" EXCLUDE_FROM_ALL)
-cmodule_restore_local_options()
 
 cmodule_select_target(libzstd_shared libzstd_static)
 target_include_directories(${CMODULE_TARGET} INTERFACE ${CMODULE_zstd_SOURCE_DIR}/lib ${CMODULE_zstd_SOURCE_DIR}/lib/common)
