@@ -19,9 +19,11 @@ cmodule_add(
   SOURCE_SUBDIR "build/cmake"
 )
 
-cmodule_select_target(libzstd_shared libzstd_static)
-target_include_directories(${CMODULE_TARGET} INTERFACE ${CMODULE_zstd_SOURCE_DIR}/lib ${CMODULE_zstd_SOURCE_DIR}/lib/common)
-add_library(zstd::libzstd ALIAS ${CMODULE_TARGET})
+if(NOT TARGET zstd::libzstd)
+  cmodule_select_target(libzstd_shared libzstd_static)
+  target_include_directories(${CMODULE_TARGET} INTERFACE ${CMODULE_zstd_SOURCE_DIR}/lib ${CMODULE_zstd_SOURCE_DIR}/lib/common)
+  add_library(zstd::libzstd ALIAS ${CMODULE_TARGET})
+endif()
 
 if(NOT TARGET zstd::libzstd_shared AND TARGET libzstd_shared)
   add_library(zstd::libzstd_shared ALIAS libzstd_shared)
