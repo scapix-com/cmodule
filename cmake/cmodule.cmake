@@ -72,6 +72,8 @@ endmacro()
 
 function(cmodule_add name version)
 
+  message(STATUS "cmodule: ${name} ${version}")
+
   cmake_parse_arguments(PARSE_ARGV 2 ARG "" "SOURCE_SUBDIR" "")
 
   set(content_name ${name}-${version})
