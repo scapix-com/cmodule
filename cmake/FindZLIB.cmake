@@ -1,7 +1,5 @@
 include_guard(GLOBAL)
 
-include(cmodule)
-
 cmodule_add(
   zlib 1.3
   URL      "https://github.com/madler/zlib/releases/download/v1.3/zlib-1.3.tar.xz"

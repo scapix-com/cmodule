@@ -1,7 +1,5 @@
 include_guard(GLOBAL)
 
-include(cmodule)
-
 cmodule_add(
   scapix 1.0.35
   URL "https://github.com/scapix-com/scapix/archive/refs/tags/v1.0.35.tar.gz"

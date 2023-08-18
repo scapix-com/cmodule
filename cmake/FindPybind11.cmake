@@ -1,7 +1,5 @@
 include_guard(GLOBAL)
 
-include(cmodule)
-
 cmodule_add(
   pybind11 2.11.1
   URL "https://github.com/pybind/pybind11/archive/refs/tags/v2.11.1.tar.gz"

@@ -2,8 +2,6 @@ get_property(__cmodule_boost_guard GLOBAL PROPERTY __cmodule_boost_guard)
 if(NOT __cmodule_boost_guard)
 set_property(GLOBAL PROPERTY __cmodule_boost_guard ON)
 
-include(cmodule)
-
 cmodule_add(
   boost 1.83.0
   URL      "https://github.com/boostorg/boost/releases/download/boost-1.83.0/boost-1.83.0.tar.xz"

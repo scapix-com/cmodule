@@ -1,7 +1,5 @@
 include_guard(GLOBAL)
 
-include(cmodule)
-
 if(BUILD_SHARED_LIBS)
   option(ZSTD_BUILD_STATIC "" OFF)
   option(ZSTD_BUILD_SHARED "" ON)

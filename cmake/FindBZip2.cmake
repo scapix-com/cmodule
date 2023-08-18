@@ -1,7 +1,5 @@
 include_guard(GLOBAL)
 
-include(cmodule)
-
 option(ENABLE_LIB_ONLY "bz2" ON)
 
 if(BUILD_SHARED_LIBS)
