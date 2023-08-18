@@ -6,8 +6,8 @@ include(cmodule)
 
 cmodule_add(
   boost 1.83.0
-  URL      "https://github.com/boostorg/boost/releases/download/boost-1.83.0/boost-1.83.0.7z"
-  URL_HASH SHA256=0b37c3ed4c92167000e9d0af4ab382a46a7bd1b3534aa71eb07d4734f3980e55
+  URL      "https://github.com/boostorg/boost/releases/download/boost-1.83.0/boost-1.83.0.tar.xz"
+  URL_HASH SHA256=c5a0688e1f0c05f354bbd0b32244d36085d9ffc9f932e8a18983a9908096f614
   SOURCE_SUBDIR "nonexistent"
 )
 
