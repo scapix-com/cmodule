@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/cmodule.cmake)
+include(cmodule)
 
 set(CURL_ENABLE_EXPORT_TARGET OFF)
 set(BUILD_SHARED_LIBS ${CMODULE_SHARED_LIB})

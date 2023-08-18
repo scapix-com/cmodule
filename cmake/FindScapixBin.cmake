@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/cmodule.cmake)
+include(cmodule)
 
 set(scapix_bin_hash_Darwin-arm64  0f2a94bba2645d9cdcc7621c7ee03a8e3776ed7308d83a774d518b600b889f20)
 set(scapix_bin_hash_Darwin-x86_64 9261ee415275343ddd5f6df8bfdac67a8ab1715e881f699a7d0873dd06306367)

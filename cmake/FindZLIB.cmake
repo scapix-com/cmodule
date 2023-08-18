@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/cmodule.cmake)
+include(cmodule)
 
 cmodule_add(
   zlib 1.2.13

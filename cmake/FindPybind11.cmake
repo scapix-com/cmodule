@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/cmodule.cmake)
+include(cmodule)
 
 cmodule_add(
   pybind11 2.11.1

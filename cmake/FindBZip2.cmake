@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/cmodule.cmake)
+include(cmodule)
 
 option(ENABLE_LIB_ONLY "libbz2: build lib only" ON)
 option(ENABLE_STATIC_LIB "libbz2: build static lib" ${CMODULE_STATIC_LIB})

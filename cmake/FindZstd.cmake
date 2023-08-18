@@ -1,4 +1,4 @@
-include(${CMAKE_CURRENT_LIST_DIR}/cmodule.cmake)
+include(cmodule)
 
 set(ZSTD_BUILD_SHARED ${CMODULE_SHARED_LIB})
 set(ZSTD_BUILD_STATIC ${CMODULE_STATIC_LIB})
