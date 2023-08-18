@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 include(cmodule)
 
 set(scapix_bin_hash_Darwin-arm64  0f2a94bba2645d9cdcc7621c7ee03a8e3776ed7308d83a774d518b600b889f20)

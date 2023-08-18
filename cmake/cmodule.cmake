@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 include(FetchContent)
 
 string(TOUPPER ${CMAKE_FIND_PACKAGE_NAME} upper_find_package_name)

@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 include(cmodule)
 
 set(ZSTD_BUILD_SHARED ${CMODULE_SHARED_LIB})
@@ -19,16 +21,14 @@ cmodule_add(
   SOURCE_SUBDIR "build/cmake"
 )
 
-if(NOT TARGET zstd::libzstd)
-  cmodule_select_target(libzstd_shared libzstd_static)
-  target_include_directories(${CMODULE_TARGET} INTERFACE ${CMODULE_zstd_SOURCE_DIR}/lib ${CMODULE_zstd_SOURCE_DIR}/lib/common)
-  add_library(zstd::libzstd ALIAS ${CMODULE_TARGET})
-endif()
+cmodule_select_target(libzstd_shared libzstd_static)
+target_include_directories(${CMODULE_TARGET} INTERFACE ${CMODULE_zstd_SOURCE_DIR}/lib ${CMODULE_zstd_SOURCE_DIR}/lib/common)
+add_library(zstd::libzstd ALIAS ${CMODULE_TARGET})
 
-if(NOT TARGET zstd::libzstd_shared AND TARGET libzstd_shared)
+if(TARGET libzstd_shared)
   add_library(zstd::libzstd_shared ALIAS libzstd_shared)
 endif()
 
-if(NOT TARGET zstd::libzstd_static AND TARGET libzstd_static)
+if(TARGET libzstd_static)
   add_library(zstd::libzstd_static ALIAS libzstd_static)
 endif()

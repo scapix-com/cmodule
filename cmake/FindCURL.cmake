@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 include(cmodule)
 
 set(CURL_ENABLE_EXPORT_TARGET OFF)

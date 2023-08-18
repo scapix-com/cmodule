@@ -1,3 +1,5 @@
+include_guard(GLOBAL)
+
 include(cmodule)
 
 option(ENABLE_LIB_ONLY "libbz2: build lib only" ON)
@@ -10,10 +12,6 @@ cmodule_add(
   URL_HASH SHA256=739669956b2f7535f4ddaa62d030027785c28d6f9615e232eabb8afe1cc58a10
 )
 
-if(NOT TARGET BZip2::BZip2)
-
-  cmodule_select_target(bz2 bz2_static)
-  target_include_directories(${CMODULE_TARGET} INTERFACE ${bzip2_SOURCE_DIR})
-  add_library(BZip2::BZip2 ALIAS ${CMODULE_TARGET})
-
-endif()
+cmodule_select_target(bz2 bz2_static)
+target_include_directories(${CMODULE_TARGET} INTERFACE ${bzip2_SOURCE_DIR})
+add_library(BZip2::BZip2 ALIAS ${CMODULE_TARGET})
