@@ -2,9 +2,15 @@ include_guard(GLOBAL)
 
 include(cmodule)
 
-option(ENABLE_LIB_ONLY "libbz2: build lib only" ON)
-option(ENABLE_STATIC_LIB "libbz2: build static lib" ${CMODULE_STATIC_LIB})
-option(ENABLE_SHARED_LIB "libbz2: build shared lib" ${CMODULE_SHARED_LIB})
+option(ENABLE_LIB_ONLY "bz2" ON)
+
+if(BUILD_SHARED_LIBS)
+  option(ENABLE_STATIC_LIB "bz2" OFF)
+  option(ENABLE_SHARED_LIB "bz2" ON)
+else()
+  option(ENABLE_STATIC_LIB "bz2" ON)
+  option(ENABLE_SHARED_LIB "bz2" OFF)
+endif()
 
 cmodule_add(
   bzip2 1.0.7-p0
@@ -12,6 +18,16 @@ cmodule_add(
   URL_HASH SHA256=739669956b2f7535f4ddaa62d030027785c28d6f9615e232eabb8afe1cc58a10
 )
 
-cmodule_select_target(bz2 bz2_static)
-target_include_directories(${CMODULE_TARGET} INTERFACE ${bzip2_SOURCE_DIR})
-add_library(BZip2::BZip2 ALIAS ${CMODULE_TARGET})
+if(TARGET bz2)
+  target_include_directories(bz2 INTERFACE ${bzip2_SOURCE_DIR})
+endif()
+
+if(TARGET bz2_static)
+  target_include_directories(bz2_static INTERFACE ${bzip2_SOURCE_DIR})
+endif()
+
+if(BUILD_SHARED_LIBS)
+  add_library(BZip2::BZip2 ALIAS bz2)
+else()
+  add_library(BZip2::BZip2 ALIAS bz2_static)
+endif()

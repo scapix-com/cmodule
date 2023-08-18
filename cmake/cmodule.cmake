@@ -2,18 +2,6 @@ include_guard(GLOBAL)
 
 include(FetchContent)
 
-string(TOUPPER ${CMAKE_FIND_PACKAGE_NAME} upper_find_package_name)
-
-if(CMODULE_SHARED_LIBS OR CMODULE_${upper_find_package_name}_SHARED_LIB)
-  set(CMODULE_SHARED_LIB YES)
-  set(CMODULE_STATIC_LIB NO)
-  set(CMODULE_LIB_TYPE "SHARED")
-else()
-  set(CMODULE_SHARED_LIB NO)
-  set(CMODULE_STATIC_LIB YES)
-  set(CMODULE_LIB_TYPE "STATIC")
-endif()
-
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 if(IOS)
@@ -59,16 +47,6 @@ macro(find_package_next name)
   list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
   find_package(${name})
   set(CMAKE_MODULE_PATH ${TEMP})
-
-endmacro()
-
-macro(cmodule_select_target shared static)
-
-  if(CMODULE_SHARED_LIB)
-    set(CMODULE_TARGET ${shared})
-  else()
-    set(CMODULE_TARGET ${static})
-  endif()
 
 endmacro()
 
