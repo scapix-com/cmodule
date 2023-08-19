@@ -26,10 +26,12 @@ cmodule_add(
 
 if(TARGET libzstd_shared)
   target_include_directories(libzstd_shared INTERFACE ${CMODULE_zstd_SOURCE_DIR}/lib ${CMODULE_zstd_SOURCE_DIR}/lib/common)
+  add_library(zstd::libzstd_shared ALIAS libzstd_shared)
 endif()
 
 if(TARGET libzstd_static)
   target_include_directories(libzstd_static INTERFACE ${CMODULE_zstd_SOURCE_DIR}/lib ${CMODULE_zstd_SOURCE_DIR}/lib/common)
+  add_library(zstd::libzstd_static ALIAS libzstd_static)
 endif()
 
 if(BUILD_SHARED_LIBS)
