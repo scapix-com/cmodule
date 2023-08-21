@@ -17,11 +17,11 @@ cmodule_add(
 )
 
 if(TARGET bz2)
-  target_include_directories(bz2 INTERFACE ${bzip2_SOURCE_DIR})
+  target_include_directories(bz2 INTERFACE ${CMODULE_bzip2_SOURCE_DIR})
 endif()
 
 if(TARGET bz2_static)
-  target_include_directories(bz2_static INTERFACE ${bzip2_SOURCE_DIR})
+  target_include_directories(bz2_static INTERFACE ${CMODULE_bzip2_SOURCE_DIR})
 endif()
 
 if(BUILD_SHARED_LIBS)
