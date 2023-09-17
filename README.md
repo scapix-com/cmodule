@@ -1,5 +1,7 @@
 ﻿# cmodule
 
+🇺🇦 If you like this project, please consider donating to one of the funds helping victims of russian aggression against Ukraine: [ukraine.ua](https://war.ukraine.ua/donate/)
+
 Non-intrusive CMake dependency management.
 
 Normally CMake's find_package() looks for packages installed on host system (and compiled for host system).
