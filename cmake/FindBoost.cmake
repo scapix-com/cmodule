@@ -3,9 +3,9 @@ if(NOT __cmodule_boost_guard)
 set_property(GLOBAL PROPERTY __cmodule_boost_guard ON)
 
 cmodule_add(
-  boost 1.83.0
-  URL      "https://github.com/boostorg/boost/releases/download/boost-1.83.0/boost-1.83.0.tar.xz"
-  URL_HASH SHA256=c5a0688e1f0c05f354bbd0b32244d36085d9ffc9f932e8a18983a9908096f614
+  boost 1.84.0
+  URL      "https://github.com/boostorg/boost/releases/download/boost-1.84.0/boost-1.84.0.tar.xz"
+  URL_HASH SHA256=2e64e5d79a738d0fa6fb546c6e5c2bd28f88d268a2a080546f74e5ff98f29d0e
   SOURCE_SUBDIR "nonexistent"
 )
 
@@ -46,13 +46,26 @@ function(cmodule_boost_add_libraries)
         add_library(boost_headers INTERFACE)
         add_library(Boost::headers ALIAS boost_headers)
         target_include_directories(boost_headers INTERFACE ${include_list})
+
+        # Compatibility targets
+
+        add_library(Boost::boost INTERFACE IMPORTED)
+        set_property(TARGET Boost::boost APPEND PROPERTY INTERFACE_LINK_LIBRARIES Boost::headers)
+
+        add_library(Boost::diagnostic_definitions INTERFACE IMPORTED)
+        add_library(Boost::disable_autolinking INTERFACE IMPORTED)
+        add_library(Boost::dynamic_linking INTERFACE IMPORTED)
+
+        if(WIN32)
+          set_property(TARGET Boost::diagnostic_definitions PROPERTY INTERFACE_COMPILE_DEFINITIONS "BOOST_LIB_DIAGNOSTIC")
+          set_property(TARGET Boost::disable_autolinking PROPERTY INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_NO_LIB")
+          set_property(TARGET Boost::dynamic_linking PROPERTY INTERFACE_COMPILE_DEFINITIONS "BOOST_ALL_DYN_LINK")
+        endif()
+
         continue()
       endif()
 
-      if(lib STREQUAL "numeric_ublas")
-        add_library(boost_numeric_ublas INTERFACE)
-        add_library(Boost::numeric_ublas ALIAS boost_numeric_ublas)
-        target_include_directories(boost_numeric_ublas INTERFACE ${CMODULE_boost_SOURCE_DIR}/libs/numeric/ublas/include)
+      if(lib STREQUAL "boost")
         continue()
       endif()
 
@@ -60,16 +73,19 @@ function(cmodule_boost_add_libraries)
 
       file(STRINGS "${CMODULE_boost_SOURCE_DIR}/libs/${lib}/CMakeLists.txt" data)
       set(dependencies "")
+
       foreach(line IN LISTS data)
         if(line MATCHES "^[ ]*Boost::([A-Za-z0-9_]+)[ ]*$")
           list(APPEND dependencies ${CMAKE_MATCH_1})
         endif()
       endforeach()
+
       cmodule_boost_add_libraries(${dependencies})
 
       cmodule_set_local_options()
       add_subdirectory(${CMODULE_boost_SOURCE_DIR}/libs/${lib} ${CMAKE_BINARY_DIR}/_deps/cmodule/boost/${lib})
       cmodule_restore_local_options()
+
     endif()
   endforeach()
 
