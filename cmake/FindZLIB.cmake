@@ -1,9 +1,9 @@
 include_guard(GLOBAL)
 
 cmodule_add(
-  zlib 1.3
-  URL      "https://github.com/madler/zlib/releases/download/v1.3/zlib-1.3.tar.xz"
-  URL_HASH SHA256=8a9ba2898e1d0d774eca6ba5b4627a11e5588ba85c8851336eb38de4683050a7
+  zlib 1.3.1
+  URL      "https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.xz"
+  URL_HASH SHA256=38ef96b8dfe510d42707d9c781877914792541133e1870841463bfa73f883e32
 )
 
 target_include_directories(zlib INTERFACE ${CMODULE_zlib_SOURCE_DIR} ${CMODULE_zlib_BINARY_DIR})
