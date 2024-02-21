@@ -1,13 +1,13 @@
 include_guard(GLOBAL)
 
-set(scapix_bin_hash_Darwin-arm64  0f2a94bba2645d9cdcc7621c7ee03a8e3776ed7308d83a774d518b600b889f20)
-set(scapix_bin_hash_Darwin-x86_64 9261ee415275343ddd5f6df8bfdac67a8ab1715e881f699a7d0873dd06306367)
-set(scapix_bin_hash_Linux-x86_64  25dd03d0d9c741bc2e4ae5a5aa40df8395e3c9bdd0f7c12cb8a7369bf2abc026)
-set(scapix_bin_hash_Windows-AMD64 47bfe0ee76793bfeddb24548f960cda1450e57ec10cad8908092b947edbddc02)
+set(scapix_bin_hash_Darwin-arm64  e4c981d3050d00c3f7fa57b2c1c4142685af5c5b38270b48079773b28ccd2a4d)
+set(scapix_bin_hash_Darwin-x86_64 344ff09be14f7ec5b82b5be34046b40af5fd5c2dbec148116028eddc6c82406b)
+set(scapix_bin_hash_Linux-x86_64  ce43736ad68b9bc6de300ff87ca1e1e44badf5d59f2076002cf0a3aa60088824)
+set(scapix_bin_hash_Windows-AMD64 eccfa62d0cf74ae263235e5207afd1e9309af73945756462e02eea3e958a175e)
 
 cmodule_add(
-  scapix_bin 2.0.15
-  URL "https://github.com/scapix-com/scapix-bin/archive/refs/tags/v2.0.15-${CMAKE_HOST_SYSTEM_NAME}-${CMAKE_HOST_SYSTEM_PROCESSOR}.tar.gz"
+  scapix_bin 2.0.16
+  URL "https://github.com/scapix-com/scapix-bin/archive/refs/tags/v2.0.16-${CMAKE_HOST_SYSTEM_NAME}-${CMAKE_HOST_SYSTEM_PROCESSOR}.tar.gz"
   URL_HASH SHA256=${scapix_bin_hash_${CMAKE_HOST_SYSTEM_NAME}-${CMAKE_HOST_SYSTEM_PROCESSOR}}
 )
 
