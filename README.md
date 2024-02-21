@@ -16,8 +16,8 @@ After initializing cmodule, regular find_package() calls will work in top level 
 include(FetchContent)
 FetchContent_Declare(
   cmodule
-  URL "https://github.com/scapix-com/cmodule/archive/refs/tags/v1.0.43.tar.gz"
-  URL_HASH SHA256=4840662739925f1d815e49e69c01dfab642f54ef0dc3808e0aa75accfa38a4cd
+  URL "https://github.com/scapix-com/cmodule/archive/refs/tags/v1.0.44.tar.gz"
+  URL_HASH SHA256=5f321ee2187b2ab940b39325fdf8bd2a127361ffec12338b0d35f9ebc723cf16
 )
 FetchContent_MakeAvailable(cmodule)
 
