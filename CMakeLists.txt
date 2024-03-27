@@ -63,7 +63,7 @@ function(cmodule_add name version)
 
   cmake_parse_arguments(PARSE_ARGV 2 ARG "" "SOURCE_SUBDIR" "")
 
-  set(content_name ${name}-${version})
+  set(content_name cmodule_${name})
   set(content_source_dir "")
 
   if(CMODULE_CACHE_SOURCE_DIR)
@@ -102,6 +102,7 @@ function(cmodule_add name version)
     file(LOCK ${source_dir}.lock RELEASE)
   endif()
 
+  # Can also use FetchContent_GetProperties(cmodule_${name}), cmodule_${lower_name}_SOURCE_DIR / cmodule_${lower_name}_BINARY_DIR.
   set(CMODULE_${name}_SOURCE_DIR ${${lower_content_name}_SOURCE_DIR} PARENT_SCOPE)
   set(CMODULE_${name}_BINARY_DIR ${${lower_content_name}_BINARY_DIR} PARENT_SCOPE)
 
