@@ -21,8 +21,11 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(cmodule)
 
-find_package(Boost REQUIRED COMPONENTS filesystem iostreams)
-target_link_libraries(mytarget PUBLIC Boost::filesystem Boost::iostreams)
+find_package(Boost REQUIRED COMPONENTS filesystem)
+target_link_libraries(mytarget PUBLIC Boost::filesystem)
+
+find_package(Boost REQUIRED COMPONENTS iostreams)
+target_link_libraries(mytarget PUBLIC Boost::iostreams)
 
 find_package(ZLIB REQUIRED)
 target_link_libraries(mytarget PRIVATE ZLIB::ZLIB)
@@ -36,13 +39,14 @@ target_link_libraries(mytarget PRIVATE CURL::libcurl)
 
 ## How cmodule differs from other package managers?
 
-Other package managers (like hunter), share binaries compiled for a particular target platform, but do not share download/unpack/store of library sources.
-This is designed to save build time and disk space for situations when you have multiple independently built projects which use a lot of the same libraries.
+Instead of providing compiled binaries, cmodule builds libraries as part of your project build.
 
-cmodule does the opposite: it shares download/unpack/store of library sources, but does not share binaries compiled for a particular platform
-(they are still shared between different targets in the same CMake build, but not between independently built CMake projects).
-If your projects are built together (as part of the same CMake build), and you cross-compile for multiple platforms (just building all Android ABIs is 4 different platforms),
-cmodule is a better choice: it shares download/unpack/store of library sources, while building libraries with EXACTLY the same CMake platform toolchain as the rest of the project.
+This has multiple advantages:
+
+- libraries seamlessly build for any target, including cross-compiling targets (iOS, Android, etc.)
+- libraries build using the same settings (compiler options) as the rest of the project
+- non intrusive syntax: automatically works for projects with regular find_package() calls
+- downloaded and extracted sources are cached by cmodule to speedup builds for different targets and builds of different projects
 
 ## More info
 
