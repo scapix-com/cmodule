@@ -84,13 +84,27 @@ function(cmodule_add name version)
     ${content_name}
     ${content_source_dir}
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    EXCLUDE_FROM_ALL
     ${ARGN}
   )
+
+  # We use FetchContent_Populate(name) (deprecated in CMake 3.30) instead of FetchContent_MakeAvailable(),
+  # because EXCLUDE_FROM_ALL is supported by FetchContent_Declare() only from CMake 3.28
+
+# cmodule_set_local_options()
+# FetchContent_MakeAvailable(${content_name})
+# cmodule_restore_local_options()
+# string(TOLOWER ${content_name} lower_content_name)
 
   FetchContent_GetProperties(${content_name})
   string(TOLOWER ${content_name} lower_content_name)
   if(NOT ${lower_content_name}_POPULATED)
+    cmake_policy(PUSH)
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.30")
+      cmake_policy(SET CMP0169 OLD)
+    endif()
     FetchContent_Populate(${content_name})
+    cmake_policy(POP)
     if(EXISTS "${${lower_content_name}_SOURCE_DIR}/${ARG_SOURCE_SUBDIR}/CMakeLists.txt")
       cmodule_set_local_options()
       add_subdirectory("${${lower_content_name}_SOURCE_DIR}/${ARG_SOURCE_SUBDIR}" "${${lower_content_name}_BINARY_DIR}" EXCLUDE_FROM_ALL)
