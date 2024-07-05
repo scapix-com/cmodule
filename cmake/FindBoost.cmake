@@ -83,7 +83,7 @@ function(cmodule_boost_add_libraries)
       cmodule_boost_add_libraries(${dependencies})
 
       cmodule_set_local_options()
-      add_subdirectory(${CMODULE_boost_SOURCE_DIR}/libs/${lib} ${CMAKE_BINARY_DIR}/_deps/cmodule/boost/${lib})
+      add_subdirectory(${CMODULE_boost_SOURCE_DIR}/libs/${lib} ${CMAKE_BINARY_DIR}/_deps/cmodule/boost/${lib} EXCLUDE_FROM_ALL)
       cmodule_restore_local_options()
 
     endif()
