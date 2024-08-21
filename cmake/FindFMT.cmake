@@ -3,7 +3,7 @@ include_guard(GLOBAL)
 option(FMT_INSTALL "" OFF)
 
 cmodule_add(
-  fmt 11.0.1
-  URL "https://github.com/fmtlib/fmt/archive/refs/tags/11.0.1.tar.gz"
-  URL_HASH SHA256=7d009f7f89ac84c0a83f79ed602463d092fbf66763766a907c97fd02b100f5e9
+  fmt 11.0.2
+  URL "https://github.com/fmtlib/fmt/archive/refs/tags/11.0.2.tar.gz"
+  URL_HASH SHA256=6cb1e6d37bdcb756dbbe59be438790db409cdb4868c66e888d5df9f13f7c027f
 )
