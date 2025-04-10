@@ -3,9 +3,9 @@ if(NOT __cmodule_boost_guard)
 set_property(GLOBAL PROPERTY __cmodule_boost_guard ON)
 
 cmodule_add(
-  boost 1.87.0
-  URL      "https://github.com/boostorg/boost/releases/download/boost-1.87.0/boost-1.87.0-cmake.tar.xz"
-  URL_HASH SHA256=7da75f171837577a52bbf217e17f8ea576c7c246e4594d617bfde7fafd408be5
+  boost 1.88.0
+  URL      "https://github.com/boostorg/boost/releases/download/boost-1.88.0/boost-1.88.0-cmake.tar.xz"
+  URL_HASH SHA256=f48b48390380cfb94a629872346e3a81370dc498896f16019ade727ab72eb1ec
   SOURCE_SUBDIR "nonexistent"
 )
 
