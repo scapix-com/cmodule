@@ -3,9 +3,9 @@ if(NOT __cmodule_boost_guard)
 set_property(GLOBAL PROPERTY __cmodule_boost_guard ON)
 
 cmodule_add(
-  boost 1.88.0
-  URL      "https://github.com/boostorg/boost/releases/download/boost-1.88.0/boost-1.88.0-cmake.tar.xz"
-  URL_HASH SHA256=f48b48390380cfb94a629872346e3a81370dc498896f16019ade727ab72eb1ec
+  boost 1.89.0
+  URL https://github.com/boostorg/boost/releases/download/boost-1.89.0/boost-1.89.0-cmake.tar.xz
+  URL_HASH SHA256=67acec02d0d118b5de9eb441f5fb707b3a1cdd884be00ca24b9a73c995511f74
   SOURCE_SUBDIR "nonexistent"
 )
 
@@ -76,7 +76,11 @@ function(cmodule_boost_add_libraries)
 
       foreach(line IN LISTS data)
         if(line MATCHES "^[ ]*Boost::([A-Za-z0-9_]+)[ ]*$")
-          list(APPEND dependencies ${CMAKE_MATCH_1})
+          set(dep ${CMAKE_MATCH_1})
+          string(REGEX REPLACE "^numeric_" "numeric/" dep_path ${dep})
+          if(EXISTS "${CMODULE_boost_SOURCE_DIR}/libs/${dep_path}/CMakeLists.txt")
+            list(APPEND dependencies ${dep})
+          endif()
         endif()
       endforeach()
 
