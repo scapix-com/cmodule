@@ -1,7 +1,7 @@
 include_guard(GLOBAL)
 
 cmodule_add(
-  scapix_jni 2.5.0
-  URL https://github.com/scapix-com/scapix-jni/archive/refs/tags/v2.5.0.tar.gz
-  URL_HASH SHA256=cb7cd5bc92da99e8c153a7958aed29a8a3be33c0375cf708c663f20e94e5a42a
+  scapix_jni 2.6.0
+  URL https://github.com/scapix-com/scapix-jni/archive/refs/tags/v2.6.0.tar.gz
+  URL_HASH SHA256=e785c7ee0cc9e060ca7d1a4651c8e51d27e143f35c408ef7f350f77583bc6d17
 )
