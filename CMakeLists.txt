@@ -1,128 +1,91 @@
-cmake_minimum_required(VERSION 3.14...3.26)
+# cmodule 3
+#
+# Builds dependencies from source as part of your build, with your toolchain,
+# so the same project works for native and any cross-compiling target.
+#
+# cmodule is a CMake dependency provider. It must be loaded via CMAKE_PROJECT_TOP_LEVEL_INCLUDES,
+# typically with a small bootstrap file (see README.md):
+#
+#   cmake -B build -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=cmake/cmodule.cmake
 
-project(cmodule)
+cmake_minimum_required(VERSION 3.28...4.5)
+
+# No project() call: this file is processed during the top level project() call,
+# while languages are being enabled, where a nested project() call is an error.
+
+# Require loading from CMAKE_PROJECT_TOP_LEVEL_INCLUDES
+# (a file from that list must be on the include stack).
+
+set(cmodule_top_level_include OFF)
+
+if(CMAKE_PROJECT_TOP_LEVEL_INCLUDES)
+  get_property(cmodule_listfile_stack DIRECTORY "${CMAKE_SOURCE_DIR}" PROPERTY LISTFILE_STACK)
+  foreach(cmodule_include IN LISTS CMAKE_PROJECT_TOP_LEVEL_INCLUDES)
+    file(REAL_PATH "${cmodule_include}" cmodule_include BASE_DIRECTORY "${CMAKE_SOURCE_DIR}")
+    foreach(cmodule_file IN LISTS cmodule_listfile_stack)
+      file(REAL_PATH "${cmodule_file}" cmodule_file)
+      if(cmodule_file STREQUAL cmodule_include)
+        set(cmodule_top_level_include ON)
+      endif()
+    endforeach()
+  endforeach()
+endif()
+
+if(NOT cmodule_top_level_include)
+  message(FATAL_ERROR
+    "cmodule 3 must be loaded via CMAKE_PROJECT_TOP_LEVEL_INCLUDES, for example:\n"
+    "  cmake -B build -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=cmake/cmodule.cmake\n"
+    "Do not include() it from CMakeLists.txt.")
+endif()
+
+set(CMODULE_VERSION "3.0.0" CACHE INTERNAL "")
+set(CMODULE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "")
+
+# Options
+
+# Default source cache, same on all platforms:
+#   1. CMODULE_CACHE_DIR environment variable (machine-wide override, e.g. Dev Drive or CI cache)
+#   2. $XDG_CACHE_HOME/cmodule
+#   3. ~/.cache/cmodule (home is %USERPROFILE% on Windows: HOME set by Git Bash/MSYS may be a Unix-style path)
 
 if(CMAKE_HOST_WIN32)
-  set(CMODULE_USER_HOME_DIR "$ENV{USERPROFILE}")
+  set(cmodule_home "$ENV{USERPROFILE}")
 else()
-  set(CMODULE_USER_HOME_DIR "$ENV{HOME}")
+  set(cmodule_home "$ENV{HOME}")
 endif()
 
-if(NOT CMODULE_USER_HOME_DIR)
-  set(CMODULE_USER_HOME_DIR "${CMAKE_SOURCE_DIR}")
+if(DEFINED ENV{CMODULE_CACHE_DIR})
+  set(cmodule_default_cache_dir "$ENV{CMODULE_CACHE_DIR}")
+elseif(DEFINED ENV{XDG_CACHE_HOME})
+  set(cmodule_default_cache_dir "$ENV{XDG_CACHE_HOME}/cmodule")
+elseif(cmodule_home)
+  set(cmodule_default_cache_dir "${cmodule_home}/.cache/cmodule")
+else()
+  set(cmodule_default_cache_dir "")
 endif()
 
-set(CMODULE_CACHE_SOURCE_DIR ${CMODULE_USER_HOME_DIR}/.cmodule CACHE PATH "Folder to cache sources downloaded by cmodule, empty string to disable")
-option(CMODULE_DISABLE_WARNINGS "Disable all compiler warnings and CMake deprecation warnings for libraries built by cmodule" ON)
-option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
+file(TO_CMAKE_PATH "${cmodule_default_cache_dir}" cmodule_default_cache_dir)
 
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH} PARENT_SCOPE)
-
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-
-macro(cmodule_set_local_options)
-  set(CMODULE_BACKUP_CMAKE_FOLDER ${CMAKE_FOLDER})
-  set(CMAKE_FOLDER "cmodule")
-
-  if(CMODULE_DISABLE_WARNINGS)
-    if(CMAKE_VERSION VERSION_LESS "4.4")
-      set(CMODULE_BACKUP_CMAKE_WARN_DEPRECATED ${CMAKE_WARN_DEPRECATED})
-      set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
-    else()
-      cmake_diagnostic(SET CMD_DEPRECATED IGNORE)
-    endif()
-    get_property(CMODULE_BACKUP_COMPILE_OPTIONS DIRECTORY PROPERTY COMPILE_OPTIONS)
-    if(MSVC)
-      add_compile_options(/W0)
-    else()
-      add_compile_options(-w)
-    endif()
-  endif()
-endmacro()
-
-macro(cmodule_restore_local_options)
-  set(CMAKE_FOLDER ${CMODULE_BACKUP_CMAKE_FOLDER})
-
-  if(CMODULE_DISABLE_WARNINGS)
-    if(CMAKE_VERSION VERSION_LESS "4.4")
-      set(CMAKE_WARN_DEPRECATED ${CMODULE_BACKUP_CMAKE_WARN_DEPRECATED} CACHE BOOL "" FORCE)
-    endif()
-    set_property(DIRECTORY PROPERTY COMPILE_OPTIONS ${CMODULE_BACKUP_COMPILE_OPTIONS})
-  endif()
-endmacro()
-
-macro(find_package_next name)
-  set(TEMP ${CMAKE_MODULE_PATH})
-  list(REMOVE_ITEM CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
-  find_package(${name})
-  set(CMAKE_MODULE_PATH ${TEMP})
-endmacro()
+set(CMODULE_CACHE_DIR "${cmodule_default_cache_dir}" CACHE PATH "Shared cache of downloaded sources, empty to disable")
+set(CMODULE_RECIPE_PATH "" CACHE STRING "Overlay directories with recipes, searched before built-in recipes")
+set(CMODULE_EXCLUDE "" CACHE STRING "Packages or recipes cmodule must not provide (left to regular find_package())")
+option(CMODULE_SHARED "Build shared libraries (BUILD_SHARED_LIBS for dependencies)" OFF)
+option(CMODULE_DISABLE_WARNINGS "Disable compiler warnings and CMake deprecation warnings for dependencies" ON)
+set(CMODULE_ON_VERSION_MISMATCH "ERROR" CACHE STRING "Requested version not compatible with recipe: ERROR or FALLBACK (to regular find_package())")
+set_property(CACHE CMODULE_ON_VERSION_MISMATCH PROPERTY STRINGS ERROR FALLBACK)
 
 include(FetchContent)
+include(CMakePackageConfigHelpers)
 
-function(cmodule_add name version)
-  message(STATUS "cmodule: ${name} ${version}")
+include("${CMAKE_CURRENT_LIST_DIR}/engine/recipe.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/engine/build.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/engine/package.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/engine/report.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/engine/provider.cmake")
 
-  cmake_parse_arguments(PARSE_ARGV 2 ARG "" "SOURCE_SUBDIR" "")
+cmodule_load_recipes()
 
-  set(content_name cmodule_${name})
-  set(content_source_dir "")
+cmake_language(SET_DEPENDENCY_PROVIDER cmodule_provide_dependency SUPPORTED_METHODS FIND_PACKAGE)
+cmake_language(DEFER DIRECTORY "${CMAKE_SOURCE_DIR}" CALL cmodule_write_report)
 
-  if(CMODULE_CACHE_SOURCE_DIR)
-    set(source_dir ${CMODULE_CACHE_SOURCE_DIR}/${name}/${version})
-    file(LOCK ${source_dir}.lock)
-    string(TOUPPER ${content_name} upper_content_name)
-    if (NOT FETCHCONTENT_SOURCE_DIR_${upper_content_name})
-      file(GLOB source_dir_files ${source_dir}/*)
-      if (source_dir_files)
-        set(FETCHCONTENT_SOURCE_DIR_${upper_content_name} ${source_dir})
-      else()
-        set(content_source_dir SOURCE_DIR ${source_dir})
-      endif()
-    endif()
-  endif()
-
-  FetchContent_Declare(
-    ${content_name}
-    ${content_source_dir}
-    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-    EXCLUDE_FROM_ALL
-    ${ARGN}
-  )
-
-  # We use FetchContent_Populate(name) (deprecated in CMake 3.30) instead of FetchContent_MakeAvailable(),
-  # because EXCLUDE_FROM_ALL is supported by FetchContent_Declare() only from CMake 3.28
-
-# cmodule_set_local_options()
-# FetchContent_MakeAvailable(${content_name})
-# cmodule_restore_local_options()
-# string(TOLOWER ${content_name} lower_content_name)
-
-  FetchContent_GetProperties(${content_name})
-  string(TOLOWER ${content_name} lower_content_name)
-  if(NOT ${lower_content_name}_POPULATED)
-    cmake_policy(PUSH)
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.30")
-      cmake_policy(SET CMP0169 OLD)
-    endif()
-    FetchContent_Populate(${content_name})
-    cmake_policy(POP)
-    if(EXISTS "${${lower_content_name}_SOURCE_DIR}/${ARG_SOURCE_SUBDIR}/CMakeLists.txt")
-      cmodule_set_local_options()
-      add_subdirectory("${${lower_content_name}_SOURCE_DIR}/${ARG_SOURCE_SUBDIR}" "${${lower_content_name}_BINARY_DIR}" EXCLUDE_FROM_ALL)
-      cmodule_restore_local_options()
-    endif()
-  endif()
-
-  if(CMODULE_CACHE_SOURCE_DIR)
-    file(LOCK ${source_dir}.lock RELEASE)
-  endif()
-
-  # Can also use FetchContent_GetProperties(cmodule_${name}), cmodule_${lower_name}_SOURCE_DIR / cmodule_${lower_name}_BINARY_DIR.
-  set(CMODULE_${name}_SOURCE_DIR ${${lower_content_name}_SOURCE_DIR} PARENT_SCOPE)
-  set(CMODULE_${name}_BINARY_DIR ${${lower_content_name}_BINARY_DIR} PARENT_SCOPE)
-
-  string(TOUPPER ${CMAKE_FIND_PACKAGE_NAME} upper_find_package_name)
-  set(${upper_find_package_name}_FOUND TRUE PARENT_SCOPE)
-  set(${CMAKE_FIND_PACKAGE_NAME}_FOUND TRUE PARENT_SCOPE)
-endfunction()
+message(STATUS "cmodule ${CMODULE_VERSION}: dependency provider enabled")

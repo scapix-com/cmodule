@@ -4,51 +4,58 @@
 
 Non-intrusive CMake dependency management.
 
-Normally CMake's find_package() looks for packages installed on host system (and compiled for host system).
-When using **cmodule**, find_package() downloads packages and compiles them using current CMake toolchain.
-This allows using C/C++ libraries (like boost) whether you are building for host system or cross-compiling for Android, iOS, WebAssembly, etc.
+cmodule builds dependencies from source as part of your build, with your toolchain,
+so the same project builds natively or cross-compiles for Android, iOS, WebAssembly, etc.
 
-## CMake integration
+cmodule is a CMake dependency provider: your `CMakeLists.txt` contains only regular `find_package()` calls,
+and users of your project can provide packages with cmodule or any other package manager.
 
-After initializing cmodule, regular find_package() calls will work in top level CMake project and all subprojects:
+Requires CMake 3.28 or newer.
 
-```cmake
-include(FetchContent)
-FetchContent_Declare(
-  cmodule
-  URL https://github.com/scapix-com/cmodule/archive/refs/tags/v2.6.0.tar.gz
-  URL_HASH SHA256=7ee432c13bf91d3c86d2ab675ba379cea079e39b9efbe183f2ab4e7b479cee90
-)
-FetchContent_MakeAvailable(cmodule)
+## Setup
 
-find_package(Boost REQUIRED COMPONENTS filesystem)
-target_link_libraries(mytarget PUBLIC Boost::filesystem)
+Download bootstrap file `cmake/cmodule.cmake` (pins the latest cmodule release by URL and hash) to your project:
 
-find_package(Boost REQUIRED COMPONENTS iostreams)
-target_link_libraries(mytarget PUBLIC Boost::iostreams)
-
-find_package(ZLIB REQUIRED)
-target_link_libraries(mytarget PRIVATE ZLIB::ZLIB)
-
-find_package(BZip2 REQUIRED)
-target_link_libraries(mytarget PRIVATE BZip2::BZip2)
-
-find_package(CURL REQUIRED)
-target_link_libraries(mytarget PRIVATE CURL::libcurl)
+```
+curl -L --create-dirs -o cmake/cmodule.cmake https://github.com/scapix-com/cmodule/releases/latest/download/cmodule.cmake
 ```
 
-## How cmodule differs from other package managers?
+Run the same command to upgrade to a new release (in Windows PowerShell 5.1, use `curl.exe`).
 
-Instead of providing compiled binaries, cmodule builds libraries as part of your project build.
+Add `CMakePresets.json`:
 
-This has multiple advantages:
+```json
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "default",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_PROJECT_TOP_LEVEL_INCLUDES": "${sourceDir}/cmake/cmodule.cmake"
+      }
+    }
+  ]
+}
+```
 
-- libraries seamlessly build for any target, including cross-compiling targets (iOS, Android, etc.)
-- libraries build using the same settings (compiler options) as the rest of the project
-- non intrusive syntax: automatically works for projects with regular find_package() calls
-- downloaded and extracted sources are cached by cmodule to speedup builds for different targets and builds of different projects
+Use regular `find_package()` in `CMakeLists.txt`:
+
+```cmake
+find_package(ZLIB REQUIRED)
+target_link_libraries(mytarget PRIVATE ZLIB::ZLIB)
+```
+
+Build:
+
+```
+cmake --preset default
+cmake --build build/default
+```
+
+Without presets: `cmake -B build -DCMAKE_PROJECT_TOP_LEVEL_INCLUDES=cmake/cmodule.cmake`
 
 ## More info
 
-[Documentation](https://www.scapix.com/cmodule)\
+[Documentation](https://www.scapix.com/cmodule) (options, writing recipes, upgrading from v2)\
 [Example](https://github.com/scapix-com/cmodule_test)

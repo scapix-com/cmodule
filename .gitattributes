@@ -1,0 +1,4 @@
+# Not part of release tarball
+.gitattributes export-ignore
+.github export-ignore
+bootstrap export-ignore
