@@ -173,6 +173,7 @@ function(cmodule_make_available recipe)
 
   if(FETCHCONTENT_SOURCE_DIR_${upper_recipe})
     set(local_override "${FETCHCONTENT_SOURCE_DIR_${upper_recipe}}")
+    cmake_path(NORMAL_PATH local_override) # for the report: a/b/../c -> a/c
   elseif(CMODULE_CACHE_DIR)
     string(SUBSTRING "${sha256}" 0 12 short_hash)
     set(cache_dir "${CMODULE_CACHE_DIR}/${recipe}/${r_VERSION}-${short_hash}")

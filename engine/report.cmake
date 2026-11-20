@@ -7,19 +7,50 @@ function(cmodule_note package recipe status)
   endif()
   set_property(GLOBAL PROPERTY CMODULE_NOTED_${package} "${status}")
 
-  cmodule_recipe_get(${recipe} VERSION version)
-  cmodule_recipe_get(${recipe} ORIGIN origin)
-  get_property(local_override GLOBAL PROPERTY CMODULE_LOCAL_OVERRIDE_${recipe})
+  # Print only what differs from the usual case (full details are in cmodule-resolved.json):
+  #   Catch2 3.16.1
+  #   ScapixCore (local: ../scapix-core)
+  #   ZLIB 1.4 (overlay: ../recipes/zlib.cmake)
+  #   Foo 2.0 (recipe: bar)
+  #   Boost (excluded)
 
   if(status STREQUAL "provided")
-    set(detail "${recipe} ${version} (${origin} recipe)")
-    if(local_override)
-      set(detail "${recipe} (local: ${local_override})")
+    cmodule_recipe_get(${recipe} VERSION version)
+    cmodule_recipe_get(${recipe} ORIGIN origin)
+    cmodule_recipe_get(${recipe} FILE file)
+    get_property(local_override GLOBAL PROPERTY CMODULE_LOCAL_OVERRIDE_${recipe})
+
+    set(details "")
+
+    # Recipe name only if it isn't the package name (ignoring case and underscores): ScapixCore = scapix_core
+    string(TOLOWER "${package}" package_key)
+    string(REPLACE "_" "" recipe_key "${recipe}")
+    if(NOT package_key STREQUAL recipe_key)
+      list(APPEND details "recipe: ${recipe}")
     endif()
-    message(STATUS "cmodule: ${package} -> ${detail}")
+
+    if(origin STREQUAL "overlay")
+      file(RELATIVE_PATH file "${CMAKE_SOURCE_DIR}" "${file}")
+      list(APPEND details "overlay: ${file}")
+    endif()
+
+    if(local_override)
+      file(RELATIVE_PATH local_override "${CMAKE_SOURCE_DIR}" "${local_override}") # e.g. ../scapix-core
+      list(APPEND details "local: ${local_override}")
+      set(line "${package}")
+    else()
+      set(line "${package} ${version}")
+    endif()
+
+    if(details)
+      list(JOIN details ", " details)
+      string(APPEND line " (${details})")
+    endif()
   else()
-    message(STATUS "cmodule: ${package} -> ${status}")
+    set(line "${package} (${status})")
   endif()
+
+  message(STATUS "cmodule: ${line}")
 
   set_property(GLOBAL APPEND PROPERTY CMODULE_NOTED_PACKAGES ${package})
 endfunction()
