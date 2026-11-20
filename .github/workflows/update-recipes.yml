@@ -1,0 +1,89 @@
+# Nightly (or manual "Run workflow"): update recipes to the latest upstream releases (tools/update-recipes.cmake)
+# and open or update pull request "update-recipes", which also bumps CMODULE_VERSION patch if needed.
+# Merge it, then push tag v<version> to release (release.yml).
+#
+# Requires repository setting: Actions > General > "Allow GitHub Actions to create and approve pull requests".
+
+name: update recipes
+
+on:
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # tags: is CMODULE_VERSION already released?
+
+      - name: Update recipes
+        id: update
+        continue-on-error: true # still open pull request for recipes which updated
+        run: |
+          set -o pipefail
+          cmake -P tools/update-recipes.cmake | tee "$RUNNER_TEMP/updates.txt"
+
+      - name: Bump version
+        id: version
+        run: |
+          if git diff --quiet -- recipes; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          VERSION=$(sed -n 's/^set(CMODULE_VERSION "\([^"]*\)".*/\1/p' CMakeLists.txt)
+          if git rev-parse -q --verify "refs/tags/v${VERSION}" > /dev/null; then
+            IFS=. read -r MAJOR MINOR PATCH <<< "${VERSION}"
+            VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
+            sed -i "s/^set(CMODULE_VERSION \"[^\"]*\"/set(CMODULE_VERSION \"${VERSION}\"/" CMakeLists.txt
+          fi
+
+          UPDATES="$RUNNER_TEMP/updates.txt"
+          if [ "$(wc -l < "${UPDATES}")" -eq 1 ]; then
+            TITLE=$(cat "${UPDATES}")
+            cp "${UPDATES}" "$RUNNER_TEMP/commit.txt"
+          else
+            TITLE="update recipes"
+            { echo "${TITLE}"; echo; cat "${UPDATES}"; } > "$RUNNER_TEMP/commit.txt"
+          fi
+
+          {
+            cat "${UPDATES}"
+            echo
+            echo "After merge, release with: \`git tag v${VERSION} && git push origin v${VERSION}\`"
+          } > "$RUNNER_TEMP/body.md"
+
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "title=${TITLE}" >> "$GITHUB_OUTPUT"
+
+      - name: Create pull request
+        if: steps.version.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: ${{ steps.version.outputs.title }}
+        run: |
+          # Branch is rebuilt from master on every run: one commit with all pending updates.
+          git switch -C update-recipes
+          git add recipes/*.cmake CMakeLists.txt
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
+            commit -F "$RUNNER_TEMP/commit.txt"
+          git push --force origin update-recipes
+
+          if [ "$(gh pr view update-recipes --json state -q .state 2> /dev/null)" = "OPEN" ]; then
+            gh pr edit update-recipes --title "${TITLE}" --body-file "$RUNNER_TEMP/body.md"
+          else
+            gh pr create --head update-recipes --title "${TITLE}" --body-file "$RUNNER_TEMP/body.md"
+          fi
+
+      - name: Report errors
+        if: steps.update.outcome == 'failure'
+        run: |
+          echo "::error::Some recipes failed to update, see 'Update recipes' step"
+          exit 1
