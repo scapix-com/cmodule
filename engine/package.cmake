@@ -12,18 +12,23 @@ function(cmodule_write_package recipe package)
     return()
   endif()
 
-  cmodule_recipe_get(${recipe} VERSION version)
+  cmodule_package_version(${recipe} version)
   cmodule_recipe_get(${recipe} COMPATIBILITY compatibility)
   cmodule_recipe_get(${recipe} VARIABLES variables)
   cmodule_recipe_get(${recipe} COMPONENTS components)
 
   set(dir "${CMAKE_FIND_PACKAGE_REDIRECTS_DIR}")
 
-  write_basic_package_version_file("${dir}/${lower_package}-config-version.cmake"
-    VERSION ${version}
-    COMPATIBILITY ${compatibility}
-    ARCH_INDEPENDENT
-  )
+  if(version)
+    write_basic_package_version_file("${dir}/${lower_package}-config-version.cmake"
+      VERSION ${version}
+      COMPATIBILITY ${compatibility}
+      ARCH_INDEPENDENT
+    )
+  else()
+    # Local sources without project(VERSION): any requested version is accepted.
+    file(WRITE "${dir}/${lower_package}-config-version.cmake" "set(PACKAGE_VERSION_COMPATIBLE TRUE)\n")
+  endif()
 
   # Use ${CMAKE_FIND_PACKAGE_NAME} in generated code: package name case is that of the find_package() call.
 

@@ -117,6 +117,29 @@ function(cmodule_add_subdirectory recipe source_dir binary_dir)
   endif()
 endfunction()
 
+# Local source directory set by the user (FETCHCONTENT_SOURCE_DIR_<RECIPE>), or empty.
+# A value pointing into cmodule's source cache was set by cmodule, not by the user.
+
+function(cmodule_local_override recipe out_var)
+  string(TOUPPER "${recipe}" upper_recipe)
+  set(dir "${FETCHCONTENT_SOURCE_DIR_${upper_recipe}}")
+  if(dir AND CMODULE_CACHE_DIR)
+    cmake_path(IS_PREFIX CMODULE_CACHE_DIR "${dir}" NORMALIZE ours)
+    if(ours)
+      set(dir "")
+    endif()
+  endif()
+  set(${out_var} "${dir}" PARENT_SCOPE)
+endfunction()
+
+# Version of the package provided by recipe: recipe VERSION, or for a local source directory,
+# its project(VERSION) (empty if unknown: any version is accepted). Valid after cmodule_make_available().
+
+function(cmodule_package_version recipe out_var)
+  get_property(version GLOBAL PROPERTY CMODULE_PACKAGE_VERSION_${recipe})
+  set(${out_var} "${version}" PARENT_SCOPE)
+endfunction()
+
 function(cmodule_make_available recipe)
   get_property(state GLOBAL PROPERTY CMODULE_STATE_${recipe})
 
@@ -157,22 +180,18 @@ function(cmodule_make_available recipe)
 
   string(TOUPPER "${recipe}" upper_recipe)
   set(source_args "")
-  set(local_override "")
   set(cache_hit FALSE)
 
   # FetchContent copies FETCHCONTENT_SOURCE_DIR_<NAME> to the cache. A value pointing into cmodule's
-  # source cache was set by cmodule (possibly for an older recipe version), not by the user.
+  # source cache was set by cmodule (possibly for an older recipe version): remove it.
 
-  if(CMODULE_CACHE_DIR AND FETCHCONTENT_SOURCE_DIR_${upper_recipe})
-    cmake_path(IS_PREFIX CMODULE_CACHE_DIR "${FETCHCONTENT_SOURCE_DIR_${upper_recipe}}" NORMALIZE ours)
-    if(ours)
-      unset(FETCHCONTENT_SOURCE_DIR_${upper_recipe} CACHE)
-      unset(FETCHCONTENT_SOURCE_DIR_${upper_recipe})
-    endif()
+  cmodule_local_override(${recipe} local_override)
+  if(NOT local_override)
+    unset(FETCHCONTENT_SOURCE_DIR_${upper_recipe} CACHE)
+    unset(FETCHCONTENT_SOURCE_DIR_${upper_recipe})
   endif()
 
-  if(FETCHCONTENT_SOURCE_DIR_${upper_recipe})
-    set(local_override "${FETCHCONTENT_SOURCE_DIR_${upper_recipe}}")
+  if(local_override)
     cmake_path(NORMAL_PATH local_override) # for the report: a/b/../c -> a/c
   elseif(CMODULE_CACHE_DIR)
     string(SUBSTRING "${sha256}" 0 12 short_hash)
@@ -230,6 +249,18 @@ function(cmodule_make_available recipe)
   set_property(GLOBAL PROPERTY CMODULE_SOURCE_DIR_${recipe} "${source_dir}")
   set_property(GLOBAL PROPERTY CMODULE_BINARY_DIR_${recipe} "${binary_dir}")
   set_property(GLOBAL PROPERTY CMODULE_LOCAL_OVERRIDE_${recipe} "${local_override}")
+
+  # Local sources: version from their project(VERSION), unknown for DOWNLOAD_ONLY recipes.
+
+  set(package_version "${r_VERSION}")
+  if(local_override)
+    set(package_version "")
+    if(NOT r_DOWNLOAD_ONLY)
+      cmake_path(APPEND source_dir "${r_SOURCE_SUBDIR}" OUTPUT_VARIABLE project_dir)
+      get_directory_property(package_version DIRECTORY "${project_dir}" DEFINITION PROJECT_VERSION)
+    endif()
+  endif()
+  set_property(GLOBAL PROPERTY CMODULE_PACKAGE_VERSION_${recipe} "${package_version}")
 
   # Imported executables (host tools)
 

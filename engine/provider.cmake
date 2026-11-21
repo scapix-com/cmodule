@@ -3,15 +3,16 @@
 # For packages with a recipe: build it (once), write a redirect package config,
 # then decline the request, so built-in find_package() loads that config.
 
-# Is recipe version compatible with requested version?
+# Is package version compatible with requested version (recipe COMPATIBILITY rules)?
 
-function(cmodule_version_compatible recipe requested exact out_var)
-  cmodule_recipe_get(${recipe} VERSION version)
+function(cmodule_version_compatible recipe version requested exact out_var)
   cmodule_recipe_get(${recipe} COMPATIBILITY compatibility)
 
   set(result FALSE)
 
-  if(exact OR compatibility STREQUAL "ExactVersion")
+  if(NOT version)
+    set(result TRUE) # local sources without project(VERSION)
+  elseif(exact OR compatibility STREQUAL "ExactVersion")
     if(version VERSION_EQUAL requested)
       set(result TRUE)
     endif()
@@ -75,12 +76,25 @@ function(cmodule_provide_dependency method package)
     return()
   endif()
 
+  # Version check: before download for recipe version,
+  # after adding local sources (FETCHCONTENT_SOURCE_DIR_<RECIPE>) for their project(VERSION).
+
+  cmodule_local_override(${recipe} local_override)
+
+  if(local_override)
+    cmodule_make_available(${recipe})
+    cmodule_package_version(${recipe} version)
+    set(source "local ${recipe} (${local_override})")
+  else()
+    cmodule_recipe_get(${recipe} VERSION version)
+    set(source "recipe ${recipe}")
+  endif()
+
   if(requested_version AND NOT requested_version MATCHES "\\.\\.\\.")
-    cmodule_version_compatible(${recipe} "${requested_version}" "${arg_EXACT}" compatible)
+    cmodule_version_compatible(${recipe} "${version}" "${requested_version}" "${arg_EXACT}" compatible)
     if(NOT compatible)
-      cmodule_recipe_get(${recipe} VERSION version)
       cmodule_recipe_get(${recipe} COMPATIBILITY compatibility)
-      set(text "find_package(${package} ${requested_version}): recipe ${recipe} ${version} is not compatible (${compatibility})")
+      set(text "find_package(${package} ${requested_version}): ${source} ${version} is not compatible (${compatibility})")
       if(CMODULE_ON_VERSION_MISMATCH STREQUAL "FALLBACK")
         cmodule_note(${package} ${recipe} "version mismatch, fallback")
         message(STATUS "cmodule: ${text}, falling back to regular find_package()")

@@ -74,7 +74,7 @@ function(cmodule_write_report)
     string(JSON entry SET "${entry}" "recipe" "\"${recipe}\"")
 
     if(status STREQUAL "provided")
-      cmodule_recipe_get(${recipe} VERSION version)
+      cmodule_package_version(${recipe} version) # of local sources, if overridden
       cmodule_recipe_get(${recipe} LICENSE license)
       cmodule_recipe_get(${recipe} ORIGIN origin)
       cmodule_recipe_get(${recipe} FILE file)
