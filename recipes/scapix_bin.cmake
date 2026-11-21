@@ -15,14 +15,3 @@ cmodule_recipe(scapix_bin
     scapix::scapix={host}/scapix
     scapix::scapix_java={host}/scapix_java
 )
-
-# Compatibility: scapix uses SCAPIX_EXE / SCAPIX_JAVA_EXE from functions called in any directory,
-# so they are cache variables (new code should use $<TARGET_FILE:scapix::scapix>).
-
-function(cmodule_scapix_bin_config package out_var)
-  cmodule_expand(scapix_bin "{location:scapix::scapix}" scapix_exe)
-  cmodule_expand(scapix_bin "{location:scapix::scapix_java}" scapix_java_exe)
-  set(${out_var}
-    "set(SCAPIX_EXE [==[${scapix_exe}]==] CACHE INTERNAL \"\")\nset(SCAPIX_JAVA_EXE [==[${scapix_java_exe}]==] CACHE INTERNAL \"\")\n"
-    PARENT_SCOPE)
-endfunction()
