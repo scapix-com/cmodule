@@ -1,7 +1,7 @@
 cmodule_recipe(scapix
-  VERSION 2.6.0
+  VERSION 2.7.0
   PACKAGES Scapix
   URL https://github.com/scapix-com/scapix/archive/refs/tags/v{version}.tar.gz
-  SHA256 836bdee668063630716b106a33a9cb7490f206e5b2c1938eda2822cd95b35c24
+  SHA256 3a9a6035c44018352bda1c77ba859ebbb94b845383c9e832051cbf7a3a6ee6ae
   LICENSE LicenseRef-Scapix
 )
