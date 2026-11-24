@@ -1,8 +1,8 @@
 cmodule_recipe(zstd
-  VERSION 1.5.7
+  VERSION 1.6.0
   PACKAGES zstd
   URL https://github.com/facebook/zstd/releases/download/v{version}/zstd-{version}.tar.gz
-  SHA256 eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3
+  SHA256 2ba599ae2a257976278e7e71e998433a387bfd18aa7b78678229fd5d84f5e9b8
   LICENSE BSD-3-Clause
   SOURCE_SUBDIR build/cmake
   OPTIONS
