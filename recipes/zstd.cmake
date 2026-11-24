@@ -12,7 +12,6 @@ cmodule_recipe(zstd
     ZSTD_BUILD_PROGRAMS=OFF
     ZSTD_BUILD_CONTRIB=OFF
     ZSTD_BUILD_TESTS=OFF
-    CMAKE_POLICY_DEFAULT_CMP0194=OLD       # project() enables ASM; keep MSVC cl as ASM compiler (unused on MSVC)
   TARGETS                                  # names used by upstream installed package
     zstd::libzstd=libzstd
 )
