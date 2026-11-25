@@ -1,7 +1,7 @@
 cmodule_recipe(scapix_jni
-  VERSION 2.8.2
+  VERSION 2.8.3
   PACKAGES ScapixJNI
   URL https://github.com/scapix-com/scapix-jni/archive/refs/tags/v{version}.tar.gz
-  SHA256 1c5daf517e4db65733175e210458f9ddd86e31f8768ae0aa630fece3c26ca7a7
+  SHA256 776fec3d3914d965f5427320eb783cdb0d80f6a3252fd68d50de17fa3b4de687
   LICENSE LicenseRef-Scapix
 )

@@ -38,7 +38,7 @@ if(NOT cmodule_top_level_include)
     "Do not include() it from CMakeLists.txt.")
 endif()
 
-set(CMODULE_VERSION "3.0.4" CACHE INTERNAL "")
+set(CMODULE_VERSION "3.0.5" CACHE INTERNAL "")
 set(CMODULE_DIR "${CMAKE_CURRENT_LIST_DIR}" CACHE INTERNAL "")
 
 # Options
